@@ -117,54 +117,59 @@ else:
     if uploaded_file:
         playlist_data = json.load(uploaded_file)
         user_df = pd.DataFrame(playlist_data)
-        user_df = user_df.dropna(subset=model_features[:-1])
-        user_vector = user_df[model_features[:-1]].mean().values.reshape(1, -1)
 
-        st.success("User profile vector computed ✅")
-
-        filter_type = st.radio("Apply Filter", ["None", "By Genre", "By Mood", "By Language"])
-        filtered_df = spotify_df.copy()
-
-        if filter_type == "By Genre":
-            genre = st.selectbox("Genre", sorted(spotify_df['track_genre'].dropna().unique()))
-            filtered_df = filtered_df[filtered_df['track_genre'].str.contains(genre, case=False)]
-
-        elif filter_type == "By Mood":
-            mood = st.selectbox("Mood", ["Energetic + Happy", "Calm + Low Valence"])
-            if mood == "Energetic + Happy":
-                filtered_df = filtered_df[(filtered_df['energy'] > 0.7) & (filtered_df['valence'] > 0.7)]
-            else:
-                filtered_df = filtered_df[(filtered_df['energy'] < 0.4) & (filtered_df['valence'] < 0.4)]
-
-        elif filter_type == "By Language":
-            if 'language' not in spotify_df.columns:
-                st.warning("The dataset has no 'language' column.")
-            else:
-                language_options = sorted(filtered_df['language'].dropna().unique())
-                selected_lang = st.selectbox("🌍 Select Language", language_options)
-                filtered_df = filtered_df[filtered_df['language'] == selected_lang]
-
-        if not filtered_df.empty:
-            scaler_local = StandardScaler()
-            df_scaled = scaler_local.fit_transform(filtered_df[model_features[:-1]])
-            user_scaled = scaler_local.transform(user_vector)
-            similarity = cosine_similarity(user_scaled, df_scaled).flatten()
-            filtered_df['similarity'] = similarity
-
-            top_k = st.slider("Select number of songs", 5, 50, 10)
-            top_songs = filtered_df.sort_values("similarity", ascending=False).head(top_k)
-            st.dataframe(top_songs[['track_name', 'track_genre', 'similarity']])
+        missing_cols = [col for col in model_features[:-1] if col not in user_df.columns]
+        if missing_cols:
+            st.error(f"The uploaded JSON is missing required feature columns: {missing_cols}")
         else:
-            st.warning("No songs found for the selected filter.")
+            user_df = user_df.dropna(subset=model_features[:-1])
+            user_vector = user_df[model_features[:-1]].mean().values.reshape(1, -1)
 
-        if st.checkbox("Show PCA Visualization"):
-            pca = PCA(n_components=2)
-            reduced = pca.fit_transform(StandardScaler().fit_transform(spotify_df[model_features[:-1]]))
-            pca_df = pd.DataFrame(reduced, columns=["PC1", "PC2"])
-            pca_df["Valence"] = (spotify_df['valence'] > 0.5).astype(int)
-            fig, ax = plt.subplots()
-            ax.scatter(pca_df["PC1"], pca_df["PC2"], c=pca_df["Valence"], cmap="coolwarm", alpha=0.6)
-            ax.set_title("PCA of Songs")
-            st.pyplot(fig)
+            st.success("User profile vector computed ✅")
+
+            filter_type = st.radio("Apply Filter", ["None", "By Genre", "By Mood", "By Language"])
+            filtered_df = spotify_df.copy()
+
+            if filter_type == "By Genre":
+                genre = st.selectbox("Genre", sorted(spotify_df['track_genre'].dropna().unique()))
+                filtered_df = filtered_df[filtered_df['track_genre'].str.contains(genre, case=False)]
+
+            elif filter_type == "By Mood":
+                mood = st.selectbox("Mood", ["Energetic + Happy", "Calm + Low Valence"])
+                if mood == "Energetic + Happy":
+                    filtered_df = filtered_df[(filtered_df['energy'] > 0.7) & (filtered_df['valence'] > 0.7)]
+                else:
+                    filtered_df = filtered_df[(filtered_df['energy'] < 0.4) & (filtered_df['valence'] < 0.4)]
+
+            elif filter_type == "By Language":
+                if 'language' not in spotify_df.columns:
+                    st.warning("The dataset has no 'language' column.")
+                else:
+                    language_options = sorted(filtered_df['language'].dropna().unique())
+                    selected_lang = st.selectbox("🌍 Select Language", language_options)
+                    filtered_df = filtered_df[filtered_df['language'] == selected_lang]
+
+            if not filtered_df.empty:
+                scaler_local = StandardScaler()
+                df_scaled = scaler_local.fit_transform(filtered_df[model_features[:-1]])
+                user_scaled = scaler_local.transform(user_vector)
+                similarity = cosine_similarity(user_scaled, df_scaled).flatten()
+                filtered_df['similarity'] = similarity
+
+                top_k = st.slider("Select number of songs", 5, 50, 10)
+                top_songs = filtered_df.sort_values("similarity", ascending=False).head(top_k)
+                st.dataframe(top_songs[['track_name', 'track_genre', 'similarity']])
+            else:
+                st.warning("No songs found for the selected filter.")
+
+            if st.checkbox("Show PCA Visualization"):
+                pca = PCA(n_components=2)
+                reduced = pca.fit_transform(StandardScaler().fit_transform(spotify_df[model_features[:-1]]))
+                pca_df = pd.DataFrame(reduced, columns=["PC1", "PC2"])
+                pca_df["Valence"] = (spotify_df['valence'] > 0.5).astype(int)
+                fig, ax = plt.subplots()
+                ax.scatter(pca_df["PC1"], pca_df["PC2"], c=pca_df["Valence"], cmap="coolwarm", alpha=0.6)
+                ax.set_title("PCA of Songs")
+                st.pyplot(fig)
     else:
         st.info("👈 Upload a playlist JSON to get personalized song recommendations.")
