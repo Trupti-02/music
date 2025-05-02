@@ -127,7 +127,7 @@ else:
 
             st.success("User profile vector computed ✅")
 
-            filter_type = st.radio("Apply Filter", ["None", "By Genre", "By Mood", "By Language"])
+            filter_type = st.radio("Apply Filter", ["None", "By Genre", "By Mood"])
             filtered_df = spotify_df.copy()
 
             if filter_type == "By Genre":
@@ -140,14 +140,6 @@ else:
                     filtered_df = filtered_df[(filtered_df['energy'] > 0.7) & (filtered_df['valence'] > 0.7)]
                 else:
                     filtered_df = filtered_df[(filtered_df['energy'] < 0.4) & (filtered_df['valence'] < 0.4)]
-
-            elif filter_type == "By Language":
-                if 'language' not in spotify_df.columns:
-                    st.warning("The dataset has no 'language' column.")
-                else:
-                    language_options = sorted(filtered_df['language'].dropna().unique())
-                    selected_lang = st.selectbox("🌍 Select Language", language_options)
-                    filtered_df = filtered_df[filtered_df['language'] == selected_lang]
 
             if not filtered_df.empty:
                 scaler_local = StandardScaler()
