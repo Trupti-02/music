@@ -108,7 +108,7 @@ elif page == "Model Evaluation":
         st.write(f"**Accuracy:** {accuracy_score(y_test, preds):.4f} | **F1-score:** {f1_score(y_test, preds):.4f} | **ROC AUC:** {roc_auc_score(y_test, model.predict_proba(X_test)[:,1]):.4f}")
 
 # --------------------------------------
-# 🎵 3. Recommend Songs
+# 🎵 3. Recommend Songs (No Language Filter)
 # --------------------------------------
 else:
     st.title("🎵 Content-Based Song Recommendation")
