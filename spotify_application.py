@@ -155,43 +155,13 @@ else:
                 st.warning("No songs found for the selected filter.")
 
 if st.checkbox("Show PCA Visualization"):
-    st.subheader("🎨 PCA Visualization of Songs")
-    
-    # Fit PCA on entire Spotify dataset
-    scaler_all = StandardScaler()
-    reduced_all = PCA(n_components=2).fit_transform(scaler_all.fit_transform(spotify_df[model_features[:-1]]))
-    pca_df = pd.DataFrame(reduced_all, columns=["PC1", "PC2"])
-    pca_df["Valence_Label"] = (spotify_df['valence'] > 0.5).astype(int)
-    pca_df["track_name"] = spotify_df["track_name"]
-    
-    # Mark recommended songs
-    top_songs_ids = top_songs.index
-    pca_df["Recommended"] = pca_df.index.isin(top_songs_ids)
-
-    fig, ax = plt.subplots(figsize=(10, 6))
-
-    # Plot non-recommended songs
-    non_rec = pca_df[~pca_df["Recommended"]]
-    scatter = ax.scatter(
-        non_rec["PC1"], non_rec["PC2"],
-        c=non_rec["Valence_Label"], cmap="coolwarm", label="All Songs", alpha=0.4
-    )
-
-    # Plot recommended songs
-    rec = pca_df[pca_df["Recommended"]]
-    ax.scatter(
-        rec["PC1"], rec["PC2"],
-        c='gold', edgecolors='black', label="Recommended Songs", s=80, marker='*'
-    )
-
-    # Legend and labels
-    ax.legend(
-        [scatter, ax.collections[1]],
-        ["All Songs (Blue = Low Valence, Red = High Valence)", "⭐ Recommended Songs"],
-        loc="upper right"
-    )
-    ax.set_title("PCA Projection of Songs (Color = Valence, ⭐ = Recommended)")
-    ax.set_xlabel("Principal Component 1")
-    ax.set_ylabel("Principal Component 2")
-
-    st.pyplot(fig)
+                pca = PCA(n_components=2)
+                reduced = pca.fit_transform(StandardScaler().fit_transform(spotify_df[model_features[:-1]]))
+                pca_df = pd.DataFrame(reduced, columns=["PC1", "PC2"])
+                pca_df["Valence"] = (spotify_df['valence'] > 0.5).astype(int)
+                fig, ax = plt.subplots()
+                ax.scatter(pca_df["PC1"], pca_df["PC2"], c=pca_df["Valence"], cmap="coolwarm", alpha=0.6)
+                ax.set_title("PCA of Songs")
+                st.pyplot(fig)
+    else:
+        st.info("👈 Upload a playlist JSON to get personalized song recommendations.")
