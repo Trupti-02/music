@@ -35,11 +35,6 @@ def load_data():
                   'instrumentalness', 'liveness', 'tempo', 'duration_ms', 'valence']
     df[audio_cols] = df[audio_cols].fillna(df[audio_cols].mean()).astype(np.float32)
 
-    if 'language' in df.columns:
-        df['language'] = df['language'].fillna("unknown").str.strip().str.lower()
-
-    return df, audio_cols
-
 spotify_df, model_features = load_data()
 
 st.sidebar.title("🔍 Navigation")
