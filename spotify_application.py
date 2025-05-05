@@ -154,7 +154,7 @@ else:
             else:
                 st.warning("No songs found for the selected filter.")
 
-if st.checkbox("Show PCA Visualization"):
+        if st.checkbox("Show PCA Visualization"):
                 pca = PCA(n_components=2)
                 reduced = pca.fit_transform(StandardScaler().fit_transform(spotify_df[model_features[:-1]]))
                 pca_df = pd.DataFrame(reduced, columns=["PC1", "PC2"])
@@ -163,5 +163,5 @@ if st.checkbox("Show PCA Visualization"):
                 ax.scatter(pca_df["PC1"], pca_df["PC2"], c=pca_df["Valence"], cmap="coolwarm", alpha=0.6)
                 ax.set_title("PCA of Songs")
                 st.pyplot(fig)
-    else:
-        st.info("👈 Upload a playlist JSON to get personalized song recommendations.")
+        else:
+            st.info("👈 Upload a playlist JSON to get personalized song recommendations.")
