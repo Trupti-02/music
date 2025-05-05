@@ -154,7 +154,7 @@ else:
             else:
                 st.warning("No songs found for the selected filter.")
 
-            if st.checkbox("Show PCA Visualization"):
+if st.checkbox("Show PCA Visualization"):
     st.subheader("🎨 PCA Visualization of Songs")
     
     # Fit PCA on entire Spotify dataset
@@ -185,11 +185,9 @@ else:
     )
 
     # Legend and labels
-    handles, labels = scatter.legend_elements(prop="colors")
-    legend_labels = ["Low Valence (Blue)", "High Valence (Red)"]
     ax.legend(
         [scatter, ax.collections[1]],
-        ["All Songs (Color by Valence)", "⭐ Recommended Songs"],
+        ["All Songs (Blue = Low Valence, Red = High Valence)", "⭐ Recommended Songs"],
         loc="upper right"
     )
     ax.set_title("PCA Projection of Songs (Color = Valence, ⭐ = Recommended)")
@@ -197,4 +195,3 @@ else:
     ax.set_ylabel("Principal Component 2")
 
     st.pyplot(fig)
-
