@@ -70,7 +70,7 @@ if page == "EDA":
 # 🤖 2. Model Evaluation
 # --------------------------------------
 elif page == "Model Evaluation":
-    st.title("🤖 Model Evaluation on Valence Prediction")
+    st.title("🤖 Model Evaluation")
     X = spotify_df[model_features[:-1]]
     y = (spotify_df['valence'] > 0.5).astype(int)
 
